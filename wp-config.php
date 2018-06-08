@@ -20,11 +20,11 @@
 
 if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') {
   $_SERVER['HTTPS'] = 'on';
-  define('WP_HOME', 'https://130.56.244.157:46296');
-  define('WP_SITEURL', 'https://130.56.244.157:46296');
+  define('WP_HOME', 'https://alveowp.apps.alveo.edu.au');
+  define('WP_SITEURL', 'https://alveowp.apps.alveo.edu.au');
 } else {
-  define('WP_HOME', 'http://130.56.244.157:46296');
-  define('WP_SITEURL', 'http://130.56.244.157:46296');
+  define('WP_HOME', 'http://alveowp.apps.alveo.edu.au');
+  define('WP_SITEURL', 'http://alveowp.apps.alveo.edu.au');
 }
 
 function fromenv($key, $default = null) {
