@@ -18,6 +18,14 @@
  * @package WordPress
  */
 
+ // No in-place theme edits, because this is a Dokku image
+define('DISALLOW_FILE_MODS', true); 
+define('DISALLOW_FILE_EDIT', true); 
+
+// Don't allow auto or in-place WP upgrades, because this is a Dokku image
+define('AUTOMATIC_UPDATER_DISABLED', true);
+define('WP_AUTO_UPDATE_CORE', false);
+
 if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') {
   $_SERVER['HTTPS'] = 'on';
   define('WP_HOME', 'https://alveowp.apps.alveo.edu.au');
