@@ -18,6 +18,8 @@
  * @package WordPress
  */
 
+define('JETPACK_IP_ADDRESS_OK', '220.233.129.230'); // Whitelist
+
  // No in-place theme edits, because this is a Dokku image
 define('DISALLOW_FILE_MODS', true); 
 define('DISALLOW_FILE_EDIT', true); 
