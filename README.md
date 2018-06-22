@@ -1,0 +1,1 @@
+This repo is for the [public Alveo website](http://alveo.edu.au), powered by [WordPress](https://wordpress.org) and [deployed](https://github.com/dokku-community/dokku-wordpress) using [Dokku](https://github.com/dokku).
