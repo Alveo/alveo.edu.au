@@ -3,7 +3,7 @@
  * Plugin Name: Custom Sidebars
  * Plugin URI:  https://wordpress.org/plugins/custom-sidebars/
  * Description: Allows you to create widgetized areas and custom sidebars. Replace whole sidebars or single widgets for specific posts and pages.
- * Version:     3.1.2
+ * Version:     3.2.2
  * Author:      WPMU DEV
  * Author URI:  http://premium.wpmudev.org/
  * Textdomain:  custom-sidebars
@@ -34,14 +34,31 @@ http://arqex.com/
 
 function inc_sidebars_init() {
 	if ( class_exists( 'CustomSidebars' ) ) {
-		return false;
+		return;
 	}
 
 	/**
 	 * Do not load plugin when saving file in WP Editor
 	 */
 	if ( isset( $_REQUEST['action'] ) && 'edit-theme-plugin-file' == $_REQUEST['action'] ) {
-		return false;
+		return;
+	}
+
+	/**
+	 * if admin, load only on proper pages
+	 */
+	if ( is_admin() && isset( $_SERVER['SCRIPT_FILENAME'] ) ) {
+		$file = basename( $_SERVER['SCRIPT_FILENAME'] );
+		$allowed = array(
+			'edit.php',
+			'admin-ajax.php',
+			'post.php',
+			'post-new.php',
+			'widgets.php',
+		);
+		if ( ! in_array( $file, $allowed ) ) {
+			return;
+		}
 	}
 
 	$plugin_dir = dirname( __FILE__ );
@@ -50,7 +67,6 @@ function inc_sidebars_init() {
 
 	define( 'CSB_PLUGIN', __FILE__ );
 	define( 'CSB_IS_PRO', false );
-	define( 'CSB_LANG_DIR', $plugin_dir_rel . '/lang/' );
 	define( 'CSB_VIEWS_DIR', $plugin_dir . '/views/' );
 	define( 'CSB_INC_DIR', $plugin_dir . '/inc/' );
 	define( 'CSB_JS_URL', $plugin_url . 'assets/js/' );
@@ -92,7 +108,6 @@ function inc_sidebars_init() {
 
 inc_sidebars_init();
 
-
 if ( ! class_exists( 'CustomSidebarsEmptyPlugin' ) ) {
 	class CustomSidebarsEmptyPlugin extends WP_Widget {
 		public function __construct() {
@@ -113,12 +128,6 @@ if ( ! class_exists( 'CustomSidebarsEmptyPlugin' ) ) {
 
 // Translation.
 function inc_sidebars_init_translation() {
-	if ( defined( 'CSB_LANG_DIR' ) ) {
-		load_plugin_textdomain(
-			'custom-sidebars',
-			false,
-			CSB_LANG_DIR
-		);
-	}
+	load_plugin_textdomain( 'custom-sidebars', false, basename( dirname( __FILE__ ) ) . '/languages' );
 }
 add_action( 'plugins_loaded', 'inc_sidebars_init_translation' );
