@@ -126,7 +126,7 @@ class Jetpack_Sync_Listener {
 			return;
 		}
 
-		// if we add any items to the queue, we should try to ensure that our script 
+		// if we add any items to the queue, we should try to ensure that our script
 		// can't be killed before they are sent
 		if ( function_exists( 'ignore_user_abort' ) ) {
 			ignore_user_abort( true );
@@ -144,7 +144,7 @@ class Jetpack_Sync_Listener {
 			 *
 			 * @since 4.2.0
 			 *
-			 * @module sync 
+			 * @module sync
 			 *
 			 * @param array The action parameters
 			 */
@@ -174,6 +174,15 @@ class Jetpack_Sync_Listener {
 		}
 
 		/**
+		 * Add an action hook to execute when anything on the whitelist gets sent to the queue to sync.
+		 *
+		 * @module sync
+		 *
+		 * @since 5.9.0
+		 */
+		do_action( 'jetpack_sync_action_before_enqueue' );
+
+		/**
 		 * Modify or reject the data within an action before it is enqueued locally.
 		 *
 		 * @since 4.2.0
@@ -193,7 +202,7 @@ class Jetpack_Sync_Listener {
 			return;
 		}
 
-		// if we add any items to the queue, we should try to ensure that our script 
+		// if we add any items to the queue, we should try to ensure that our script
 		// can't be killed before they are sent
 		if ( function_exists( 'ignore_user_abort' ) ) {
 			ignore_user_abort( true );
@@ -259,6 +268,8 @@ class Jetpack_Sync_Listener {
 			'is_wp_rest'       => defined( 'REST_REQUEST' ) ? REST_REQUEST : false,
 			'is_ajax'          => defined( 'DOING_AJAX' ) ? DOING_AJAX : false,
 			'is_wp_admin'      => is_admin(),
+			'is_cli'           => defined( 'WP_CLI' ) ? WP_CLI : false,
+			'from_url'         => $this->get_request_url(),
 		);
 
 		if ( $this->should_send_user_data_with_actor( $current_filter ) ) {
@@ -290,5 +301,12 @@ class Jetpack_Sync_Listener {
 		$this->full_sync_queue = new Jetpack_Sync_Queue( 'full_sync' );
 		$this->set_queue_size_limit( Jetpack_Sync_Settings::get_setting( 'max_queue_size' ) );
 		$this->set_queue_lag_limit( Jetpack_Sync_Settings::get_setting( 'max_queue_lag' ) );
+	}
+
+	function get_request_url() {
+		if ( isset( $_SERVER['HTTP_HOST'], $_SERVER['REQUEST_URI'] ) ) {
+			return 'http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://' . "{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}";
+		}
+		return is_admin() ? get_admin_url( get_current_blog_id() ) : home_url();
 	}
 }
