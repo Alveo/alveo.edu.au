@@ -1,9 +1,9 @@
 <?php
 /*
 Plugin Name: Custom CSS Pro
-Plugin URI: http://waspthemes.com
+Plugin URI: https://wordpress.org/plugins/custom-css-pro/
 Description: Add Custom CSS to your wordpress site in live preview as professional.
-Version: 1.0.2
+Version: 1.0.3
 Author: WaspThemes
 Author URI: https://waspthemes.com
 License: GPLv2 or later
@@ -125,7 +125,7 @@ function ccp_blank_page_markup() {
 
         <div id="ccp-section">
             <div id="ccp-bar">
-                <a class="ccp-close"></a>
+                <a class="ccp-close" href="<?php echo get_home_url(); ?>"></a>
                 <a class="ccp-btn ccp-visual-editor" target="_blank" href="http://waspthemes.com/yellow-pencil/?utm_source=ccp&utm_medium=text&utm_campaign=ccp">Visual Editor [AD]</a>
                 <a id="ccp-save" class="ccp-btn">Save Changes</a>
             </div>

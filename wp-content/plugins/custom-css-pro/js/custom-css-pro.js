@@ -79,6 +79,7 @@
 		    	if (e.which <= 90 && e.which >= 48 || e.which >= 96 && e.which <= 105 || e.which == 170 || e.which == 173 || e.which == 13 || e.which == 162 || e.which == 9 || e.which == 8 || e.which == 190 || e.which == 111 || e.which == 106 || e.which == 109 || e.which == 107 || e.which == 110 || e.which == 32){
 			    	if($("#ccp-save").hasClass("active") == false){
 			    		$("#ccp-save").addClass("active").text("Save Changes");
+						$(".ccp-visual-editor").css("right", "135px");
 			    	}
 			    }
 		    }
@@ -136,20 +137,14 @@
 		});
 
 
-		// Adding link to close btn.
-		var g = ccp_delete_query($("#ccp-iframe").get(0).contentWindow.location.href,"ccp-iframe");
-		$(".ccp-close").attr("href", g);
-
-
 		// Check close btn
 		$(".ccp-close").click(function(e){
 
 		    if($("#ccp-save").hasClass("active")){
-		    	
-				e.preventDefault();
 
-		    	if(confirm("Do you want to close without saving the changes?")){
-		    		window.location = $(this).data("href");
+		    	if(!confirm("Do you want to close without saving the changes?")){
+		    		e.preventDefault();
+		    		return false;
 		    	}
 
 		    }
@@ -169,7 +164,8 @@
 			}
 			
 			// Saving
-			t.text("Saving").removeClass("active");
+			t.text("Saving...").removeClass("active");
+			$(".ccp-visual-editor").css("right", "104px");
 			
 		    // Post
 		    $.ajax({
@@ -181,6 +177,7 @@
 				}
 			}).done(function(){
 				t.text("Saved");
+				$(".ccp-visual-editor").css("right", "89px");
 			});
 
 		});
@@ -198,34 +195,6 @@
 			return uri + separator + key + "=" + value;
 		}
 	}
-
-
-	// Remove URL Parementer
-	// Source: http://stackoverflow.com/questions/1634748/how-can-i-delete-a-query-string-parameter-in-javascript
-	function ccp_delete_query(url, parameter) {
-
-    //prefer to use l.search if you have a location/link object
-    var urlparts= url.split('?');   
-    if (urlparts.length>=2) {
-
-        var prefix= encodeURIComponent(parameter)+'=';
-        var pars= urlparts[1].split(/[&;]/g);
-
-        //reverse iteration as may be destructive
-        for (var i= pars.length; i-- > 0;) {    
-            //idiom for string.startsWith
-            if (pars[i].lastIndexOf(prefix, 0) !== -1) {  
-                pars.splice(i, 1);
-            }
-        }
-
-        url= urlparts[0] + (pars.length > 0 ? '?' + pars.join('&') : "");
-        return url;
-    }else{
-        return url;
-    }
-
-}
 
 
 }(jQuery));
