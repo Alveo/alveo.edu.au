@@ -222,6 +222,8 @@
 
             $color.find(".colorInner").css("backgroundColor", self.colorHex);
             $colorInput.val(self.colorHex);
+            console.log($colorInput);
+            $('input[name=wplp_colorpicker]').val(self.colorHex);
         };
 
         this.hexToRgb = function(hex)

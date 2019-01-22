@@ -17,7 +17,6 @@
   }
 }(this, function($) {
 var pluginName = "dropify";
-
 /**
  * Dropify plugin
  *

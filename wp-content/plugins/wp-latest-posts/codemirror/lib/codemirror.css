@@ -165,6 +165,10 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
   border-right: 30px solid transparent;
 }
 
+.CodeMirror-scroll {
+  overflow: auto !important;
+}
+
 /* The fake, visible scrollbars. Used to force redraw during scrolling
    before actuall scrolling happens, thus preventing shaking and
    flickering artifacts. */

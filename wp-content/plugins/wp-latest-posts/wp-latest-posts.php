@@ -3,7 +3,7 @@
  * Plugin Name: WP Latest Posts
  * Plugin URI: http://www.joomunited.com/wordpress-products/wp-latest-posts
  * Description: Advanced frontpage and widget news slider
- * Version: 4.2.3
+ * Version: 4.5.4
  * Text Domain: wp-latest-posts
  * Domain Path: /languages
  * Author: JoomUnited
@@ -11,7 +11,7 @@
  * License: GPL2
  */
 
-/**
+/*
  * @copyright 2014  Joomunited  ( email : contact _at_ joomunited.com )
  *
  *  Original development of this plugin was kindly funded by Joomunited
@@ -36,16 +36,21 @@ define('POSITIVE_INT_GT1', 'positive_integer_1+');  //Those fields need to have 
 define('BOOL', 'bool');       //Booleans
 define('FILE_UPLOAD', 'file_upload');    //File uploads
 define('LI_TO_ARRAY', 'li_to_array');    //Convert sortable lists to array
-define('DEFAULT_IMG_PREFIX', 'wplp_default_img_');  //Default uploaded image file prefix
+define('STRING_UNSET', 'string_unset');  //Unset settings with checkbox
+define('WPLP_PREFIX', 'wplp_'); //Prefix declaration
 define('MAIN_FRONT_STYLESHEET', 'css/wplp_front.css');  //Main front-end stylesheet
 define('MAIN_FRONT_SCRIPT', 'js/wplp_front.js');  //Main front-end jQuery script
 define('DEFAULT_IMG', 'img/default-image-fpnp.png'); //Default thumbnail image
-//const   THEME_LIBRARY                   = 'themes/default/default.php';
-define('USE_LOCAL_JS_LIBS', true);
 define('WPLP_PLUGIN_DIR', plugin_dir_url(__FILE__));
+define('WPLP_PLUGIN_PATH', dirname(__FILE__));
 //Check plugin requirements
 if (version_compare(PHP_VERSION, '5.3', '<')) {
     if (!function_exists('wplp_disable_plugin')) {
+        /**
+         * Disable plugin function
+         *
+         * @return void
+         */
         function wplp_disable_plugin()
         {
             if (current_user_can('activate_plugins') && is_plugin_active(plugin_basename(__FILE__))) {
@@ -56,10 +61,16 @@ if (version_compare(PHP_VERSION, '5.3', '<')) {
     }
 
     if (!function_exists('wplp_show_error')) {
+        /**
+         * Show error when active plugin at least PHP 5.3 version
+         *
+         * @return void
+         */
         function wplp_show_error()
         {
             $echo = '<div class="error"><p><strong>WP Latest Posts</strong>';
             $echo .= 'need at least PHP 5.3 version, please update php before installing the plugin.</p></div>';
+            //phpcs:ignore WordPress.Security.EscapeOutput -- Plain text html, no variables to escape
             echo $echo;
         }
     }
@@ -72,8 +83,35 @@ if (version_compare(PHP_VERSION, '5.3', '<')) {
     return;
 }
 
+if (!class_exists('\Joomunited\WPLP\JUCheckRequirements')) {
+    require_once(trailingslashit(dirname(__FILE__)) . 'requirements.php');
+}
+
+if (class_exists('\Joomunited\WPLP\JUCheckRequirements')) {
+    // Plugins name for translate
+    $args = array(
+        'plugin_name' => esc_html__('WP Latest Posts', 'wp-latest-posts'),
+        'plugin_path' => 'wp-latest-posts/wp-latest-posts.php',
+        'plugin_textdomain' => 'wp-latest-posts',
+        'requirements' => array(
+            'php_version' => '5.3',
+            // Minimum addons version
+            'addons_version' => array(
+                'wplpAddons' => '4.4.0'
+            )
+        ),
+    );
+    $wplpCheck = call_user_func('\Joomunited\WPLP\JUCheckRequirements::init', $args);
+
+    if (!$wplpCheck['success']) {
+        // Do not load anything more
+        unset($_GET['activate']);
+        return;
+    }
+}
+
 //Include the jutranslation helpers
-include_once('jutranslation' . DIRECTORY_SEPARATOR . 'jutranslation.php');
+require_once 'jutranslation' . DIRECTORY_SEPARATOR . 'jutranslation.php';
 call_user_func(
     '\Joomunited\WPLatestPosts\Jutranslation\Jutranslation::init',
     __FILE__,
@@ -82,30 +120,42 @@ call_user_func(
     'wp-latest-posts',
     'languages' . DIRECTORY_SEPARATOR . 'wp-latest-posts-en_US.mo'
 );
-/** Class includes **/
-include_once(dirname(__FILE__) . '/inc/wplp-admin.inc.php');            // custom classes
-include_once(dirname(__FILE__) . '/inc/wplp-widget.inc.php');        // custom classes
-include_once(dirname(__FILE__) . '/inc/wplp-front.inc.php');            // custom classes
 
-if (function_exists('icl_object_id') || class_exists('Polylang')) {
-    // WPML installed
-    // Polylang installed
-    include_once(dirname(__FILE__) . '/inc/compatibility/class.language_content_wpml.php');
-    new WPLPLanguageContent();
-}
-include_once(dirname(__FILE__) . '/views/wplp-block-settings.php'); //view wplp block settings
-include_once(dirname(__FILE__) . '/views/wplp-configuration.php'); //view config page
+
+// Install
+require_once dirname(__FILE__) . '/inc/install.php';
+// Class includes
+require_once dirname(__FILE__) . '/inc/wplp-admin.inc.php';            // custom classes
+require_once dirname(__FILE__) . '/inc/wplp-widget.inc.php';        // custom classes
+require_once dirname(__FILE__) . '/inc/wplp-front.inc.php';            // custom classes
+// WPML installed
+// Polylang installed
+require_once dirname(__FILE__) . '/inc/compatibility/class.language_content_wpml.php';
+new WPLPLanguageContent();
+// Require add image for category
+require_once dirname(__FILE__) . '/inc/wplp-category-image.php';
+new WPLPCategoryImage();
+
 
 /**
  * Just fill up necessary settings in the configuration array
  * to create a new custom plugin instance...
- *
  */
 global $wpcu_wpfn;
 $wpcu_wpfn = new WPLPAdmin(
     array(
-        'version' => '4.2.3',
+        'version' => '4.5.4',
         'translation_domain' => 'wp-latest-posts', // must be copied in the widget class!!!
         'plugin_file' => __FILE__,
     )
 );
+
+
+// Load Addons
+if (isset($wplpCheck) && !empty($wplpCheck['load'])) {
+    foreach ($wplpCheck['load'] as $addonName) {
+        if (function_exists($addonName . 'Init')) {
+            call_user_func($addonName . 'Init');
+        }
+    }
+}

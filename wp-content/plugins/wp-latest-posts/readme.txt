@@ -2,8 +2,8 @@
 Contributors: JoomUnited
 Tags: latest post, news widget, recent posts, posts, recent post widget, news posts, latest page, custom content, previous posts, page, featured posts, article display, news display, news slider, page display, post display, article display, frontpage news, news
 Requires at least: 4.0
-Tested up to: 4.9.1
-Stable tag: 4.2.3
+Tested up to: 5.0.1
+Stable tag: 4.5.4
 Requires PHP: 5.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -50,6 +50,7 @@ The main idea of this plugin is to visually take the latest or custom content li
 * PHP code generation to include news display in your theme
 * WPML integration: Filter news content by WPML language
 * Polylang integration: Filter news content by Polylang language
+* Progressive loading for images in default theme for better performance
 
 
 = WP Latest posts add-on features (optional, still open-source version) =
@@ -108,7 +109,7 @@ WP Latest posts is using HTML5 features so to be sure run the latest version of 
 WP Latest posts is compatible with IE9+ and all modern browsers for news display
 
 = Is WP Latest posts slowing down my website? =
-Nope :) All your news display content is properly stored in the database also cached on client side
+Very few :) All your news display content is properly stored in the database also cached on client side. Furthermore, there's a progressive loading for images in free default theme for better performance
 
 = Compatibility =
 What's the minimum version of WordPress required to run WP Latest posts? WordPress 4.0 is required. WP Latest posts may generate PHP errors if you tried to run it on an earlier version, and so it will simply refuse to activate on any version of WordPress that's older than 4.0
@@ -144,6 +145,48 @@ Yes the support has been added since the 3.5.2 version.
  
 
 == Changelog ==
+
+= 4.5.4 =
+* Add : Gutenberg block to load and search news blocks
+
+= 4.5.3 =
+* Fix : Notice closed for a month
+* Add : WordPress 5.0 compatibility
+
+= 4.5.2 =
+* Fix : Update new item in the settings
+
+= 4.5.1 =
+* Fix : Display news block list
+* Fix : Blank screen while updating news block
+
+= 4.5.0 =
+* Add : New UX for Blocks and Configuration
+* Add : Settings UX with AJAX search engine
+* Add : Hide settings when not related to the theme selected
+* Add : Plugin installer with quick configuration
+* Add : Environment checker on install (PHP Version, PHP Extensions, Apache Modules)
+* Add : System Check menu to notify of server configuration problems after install
+
+= 4.4.2 =
+* Fix : Display excerpt content in multisite
+* Fix : Enhance code readability and performance with phpcs
+
+= 4.4.1 =
+* Fix : Sharing translations
+
+= 4.4.0 =
+* Add : Progressive loading in default theme, performance optimization
+* Add : Setting to define arrows color and arrows hover color
+* Add : Overlay color on image mouse hover
+* Add : Read more button design option
+
+= 4.3.0 =
+* Add : Add the possibility to list as content source, the WordPress post categories
+
+= 4.2.4 =
+* Fix : Put the PRO notifications under the content management
+* Fix : Image stretched to fit this size even if the setting is set to off
 
 = 4.2.3 =
 * Fix : Disable touch slide on flexslider

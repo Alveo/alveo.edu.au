@@ -53,7 +53,7 @@
             mode: 'css',
             theme: '3024-day',
             lineNumbers: true,
-            lineWrapping : false,
+            lineWrapping : true,
             autoRefresh:true,
             styleActiveLine: true,fixedGutter:true,
             lint:true, coverGutterNextToScrollbar:false,

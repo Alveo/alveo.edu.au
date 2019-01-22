@@ -1,6 +1,12 @@
 <?php
-if (!defined('ABSPATH')) exit;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+/**
+ * Class WPLPLanguageContent
+ */
 class WPLPLanguageContent
 {
     /**
@@ -13,14 +19,97 @@ class WPLPLanguageContent
         add_filter('wplp_get_pages_by_language', array($this, 'getPagesByLanguage'), 10, 2);
         add_filter('wplp_get_tags_by_language', array($this, 'getTagsByLanguage'), 10, 2);
         add_filter('wplp_get_custom_taxonomy_by_language', array($this, 'getCustomTaxonomyByLanguage'), 10, 4);
+        add_filter('wplp_category_list_by_language', array($this, 'getCategoryListByLanguage'), 10, 3);
+        add_filter('wplp_get_term_link_by_language', array($this, 'getTermLinkByLanguage'), 10, 3);
+    }
+
+    /**
+     * Get list category by language
+     *
+     * @param array  $args     An array of arguments
+     * @param string $language Language to get translated
+     * @param array  $cats     An array of category
+     *
+     * @return array|integer
+     */
+    public function getCategoryListByLanguage($args, $language, $cats)
+    {
+        if (function_exists('icl_object_id') && !function_exists('pll_languages_list')) {
+            global $sitepress;
+            if (!empty($language)) {
+                // Switch to language to get category
+                $sitepress->switch_lang($language);
+                $cats = get_terms($args);
+                $sitepress->switch_lang(ICL_LANGUAGE_CODE);
+            }
+        }
+        if (function_exists('pll_languages_list')) {
+            $cat_ids = array();
+            $ppl_cats = array();
+            if (empty($cats)) {
+                // Get category by ajax selector
+                $cats = get_terms($args);
+            }
+            if (!empty($language)) {
+                $list_language = pll_languages_list(array('fields' =>'slug'));
+                if (!in_array($language, $list_language)) {
+                    // If content language not saved, Using default language
+                    return $cats;
+                }
+                foreach ($cats as $cat) {
+                    // Return the category translation by polylang
+                    $ppl_cat_id = pll_get_term($cat->term_id, $language);
+                    if (!$ppl_cat_id) {
+                        continue;
+                    }
+                    $cat_ids[] = $ppl_cat_id;
+                }
+                if (!empty($cat_ids)) {
+                    // Remove duplicate category id
+                    $cat_ids = array_unique($cat_ids);
+                    foreach ($cat_ids as $id) {
+                        // Get category translated
+                        $ppl_cats[] = get_term($id);
+                    }
+                    return $ppl_cats;
+                }
+            }
+        }
+
+        return $cats;
+    }
+    /**
+     * Get link of term by language
+     *
+     * @param integer $postId   Id of post
+     * @param string  $language Language to get translated
+     * @param string  $links    Link of term
+     *
+     * @return array|string
+     */
+    public function getTermLinkByLanguage($postId, $language, $links)
+    {
+        if (function_exists('icl_object_id') && !function_exists('pll_languages_list')) {
+            global $sitepress;
+            if (!empty($language)) {
+                // Switch to language to get link category in wpml
+                $sitepress->switch_lang($language);
+                $links = get_term_link($postId);
+                $sitepress->switch_lang(ICL_LANGUAGE_CODE);
+            }
+        }
+        return $links;
     }
 
     /**
      * Get posts by language via WPML
-     * @param $posts
-     * @param $post_type - Type of post
-     * @param $language - Language to get translated posts
-     * @return array - Return translated posts
+     * Return translated posts
+     *
+     * @param integer $posts     Id of posts
+     * @param string  $post_type Type of post
+     * @param string  $language  Language to get translated
+     *
+     * @return array|integer
      */
     public function getPostsByLanguage($posts, $post_type, $language)
     {
@@ -78,11 +167,15 @@ class WPLPLanguageContent
 
         return $posts;
     }
+
     /**
      * Get category by selected language
-     * @param $cats
-     * @param $language
-     * @return array - Return translated term
+     * Return translated term
+     *
+     * @param array  $cats     List of categories.
+     * @param string $language Language to get translated posts
+     *
+     * @return array
      */
     public static function getCategoryByLanguage($cats, $language)
     {
@@ -129,11 +222,15 @@ class WPLPLanguageContent
 
         return $cats;
     }
+
     /**
      * Get pages by selected language
-     * @param $pages
-     * @param $language
-     * @return array|false - Return translated pages
+     * Return translated pages
+     *
+     * @param array  $pages    List of pages
+     * @param string $language Language to get translated
+     *
+     * @return array|false
      */
     public static function getPagesByLanguage($pages, $language)
     {
@@ -177,11 +274,15 @@ class WPLPLanguageContent
         }
         return $pages;
     }
+
     /**
      * Get pages by selected language
-     * @param $tags
-     * @param $language
-     * @return array - Return translated term
+     * Return translated term
+     *
+     * @param array  $tags     List of tags
+     * @param string $language Language to get translated
+     *
+     * @return array
      */
     public static function getTagsByLanguage($tags, $language)
     {
@@ -224,13 +325,16 @@ class WPLPLanguageContent
         }
         return $tags;
     }
+
     /**
      * Get taxonomy by selected language
-     * @param $terms
-     * @param $taxname
-     * @param $postType
-     * @param $language
-     * @return array|int|WP_Error
+     *
+     * @param array  $terms    List terms
+     * @param string $taxname  Tax name
+     * @param string $postType Type of posts
+     * @param string $language Language to get translated
+     *
+     * @return array|integer
      */
     public static function getCustomTaxonomyByLanguage($terms, $taxname, $postType, $language)
     {
@@ -238,10 +342,13 @@ class WPLPLanguageContent
             global $sitepress;
             if (!empty($language)) {
                 $sitepress->switch_lang($language);
-                $terms = get_terms($taxname, array(
+                $terms = get_terms(
+                    $taxname,
+                    array(
                     'post_type' => array($postType),
                     'hide_empty' => false,
-                ));
+                    )
+                );
                 $sitepress->switch_lang(ICL_LANGUAGE_CODE);
             }
         }
@@ -249,10 +356,13 @@ class WPLPLanguageContent
             $ppl_cpts = array();
             $cpt_ids = array();
             if (empty($terms)) {
-                $terms = get_terms($taxname, array(
+                $terms = get_terms(
+                    $taxname,
+                    array(
                     'post_type' => array($postType),
                     'hide_empty' => false,
-                ));
+                    )
+                );
             }
             if (!empty($language)) {
                 $list_language = pll_languages_list(array('fields' =>'slug'));
@@ -278,14 +388,23 @@ class WPLPLanguageContent
         }
         return $terms;
     }
+
     /**
      * AJAX change source type with language plugin
+     *
+     * @return void
      */
     public static function changeSourceTypeByLanguage()
     {
         // Check ajax security
         check_ajax_referer('_change_content_language', 'security');
-        $html = $language = $type = $blog_post = $blog_page = $blog_tags = '';
+        $html = '';
+        $language = '';
+        $type = '';
+        $blog_post = '';
+        $blog_page = '';
+        $blog_tags = '';
+        $blog_catlist = '';
         if (isset($_POST['language'])) {
             $language = $_POST['language'];
         }
@@ -302,11 +421,15 @@ class WPLPLanguageContent
             $blog_tags= $_POST['blog_tags'];
         }
 
-        if ($type == 'src_category') {
-            $html .= '<li><input id="cat_all" type="checkbox" name="wplp_source_category[]"';
+        if (isset($_POST['blog_catlist'])) {
+            $blog_catlist= $_POST['blog_catlist'];
+        }
+
+        if ($type === 'src_category') {
+            $html .= '<li><input id="cat_all" type="checkbox" name="wplp_source_category[]" class="ju-checkbox"';
             $html .= 'value="_all" checked="checked" /><label for="cat_all" class="post_cb">All</li>';
             if (is_multisite()) {
-                if ('all_blog' == $blog_post) {
+                if ('all_blog' === $blog_post) {
                     $blogs = get_sites();
                     foreach ($blogs as $blog) {
                         switch_to_blog((int)$blog->blog_id);
@@ -321,13 +444,22 @@ class WPLPLanguageContent
                     $cats = get_categories();
                     restore_current_blog();
                 }
-
+                /**
+                 * Get list category via multilanguage plugin.
+                 *
+                 * @param array  List category
+                 * @param string Language to translate
+                 *
+                 * @internal
+                 *
+                 * @return array
+                 */
                 $cats = apply_filters('wplp_get_category_by_language', $cats, $language);
 
                 foreach ($cats as $k => $cat) {
                     $html .= '<li>';
                     $html .= '<input id="ccb_' . $k . '" type="checkbox" name="wplp_source_category[]" value="';
-                    $html .= $k . '_' . $cat->term_id . '"  class="post_cb" />';
+                    $html .= $k . '_' . $cat->term_id . '"  class="post_cb ju-checkbox" />';
                     $html .= '<label for="ccb_' . $k . '" class="post_cb">' . $cat->name . '</label>';
                     $html .= '</li>';
                 }
@@ -336,16 +468,16 @@ class WPLPLanguageContent
                 foreach ($cats as $k => $cat) {
                     $html .= '<li>';
                     $html .= '<input id="ccb_' . $k . '" type="checkbox" name="wplp_source_category[]" value="';
-                    $html .= $cat->term_id . '"  class="post_cb" />';
+                    $html .= $cat->term_id . '"  class="post_cb ju-checkbox" />';
                     $html .= '<label for="ccb_' . $k . '" class="post_cb">' . $cat->name . '</label>';
                     $html .= '</li>';
                 }
             }
-        } elseif ($type == 'src_page') {
-            $html .= '<li><input id="page_all" type="checkbox" name="wplp_source_pages[]"';
+        } elseif ($type === 'src_page') {
+            $html .= '<li><input id="page_all" type="checkbox" name="wplp_source_pages[]" class="ju-checkbox"';
             $html .= 'value="_all" checked="checked" /><label for="page_all" class="page_cb">All Pages</li>';
             if (is_multisite()) {
-                if ('all_blog' == $blog_page) {
+                if ('all_blog' === $blog_page) {
                     $blogs = get_sites();
                     foreach ($blogs as $blog) {
                         switch_to_blog((int)$blog->blog_id);
@@ -360,12 +492,22 @@ class WPLPLanguageContent
                     $pages = get_pages();
                     restore_current_blog();
                 }
+                /**
+                 * Get list pages via multilanguage plugin.
+                 *
+                 * @param array  List pages
+                 * @param string Language to translate
+                 *
+                 * @internal
+                 *
+                 * @return array
+                 */
                 $pages = apply_filters('wplp_get_pages_by_language', $pages, $language);
 
                 foreach ($pages as $k => $page) {
                     $html .= '<li>';
                     $html .= '<input id="pcb_' . $k . '" type="checkbox" name="wplp_source_pages[]" value="';
-                    $html .= $k . '_' . $page->ID . '" class="page_cb" />';
+                    $html .= $k . '_' . $page->ID . '" class="page_cb ju-checkbox" />';
                     $html .= '<label for="pcb_' . $k . '" class="page_cb">' . $page->post_title . '</label>';
                     $html .= '</li>';
                 }
@@ -374,16 +516,16 @@ class WPLPLanguageContent
                 foreach ($pages as $k => $page) {
                     $html .= '<li>';
                     $html .= '<input id="pcb_' . $k . '" type="checkbox" name="wplp_source_pages[]"';
-                    $html .= 'value="' . $page->ID . '"  class="page_cb" />';
+                    $html .= 'value="' . $page->ID . '"  class="page_cb ju-checkbox" />';
                     $html .= '<label for="pcb_' . $k . '" class="page_cb">' . $page->post_title . '</label>';
                     $html .= '</li>';
                 }
             }
-        } elseif ($type == 'src_tags') {
-            $html .= '<li><input id="tags_all" type="checkbox" name="wplp_source_tags[]"';
+        } elseif ($type === 'src_tags') {
+            $html .= '<li><input id="tags_all" type="checkbox" name="wplp_source_tags[]" class="ju-checkbox"';
             $html .= 'value="_all" checked="checked" /><label for="tags_all" class="tag_cb">All tags</li>';
             if (is_multisite()) {
-                if ('all_blog' == $blog_tags) {
+                if ('all_blog' === $blog_tags) {
                     $blogs = get_sites();
                     foreach ($blogs as $blog) {
                         switch_to_blog((int)$blog->blog_id);
@@ -400,11 +542,21 @@ class WPLPLanguageContent
                     $tags = get_tags();
                     restore_current_blog();
                 }
+                /**
+                 * Get list tags via multilanguage plugin.
+                 *
+                 * @param array  List tags
+                 * @param string Language to translate
+                 *
+                 * @internal
+                 *
+                 * @return array
+                 */
                 $tags = apply_filters('wplp_get_tags_by_language', $tags, $language);
                 foreach ($tags as $k => $tag) {
                     $html .= '<li>';
                     $html .= '<input id="tcb_' . $k . '" type="checkbox" name="wplp_source_tags[]" value="';
-                    $html .= $k . '_' . $tag->term_id . '" class="tag_cb" />';
+                    $html .= $k . '_' . $tag->term_id . '" class="tag_cb ju-checkbox" />';
                     $html .= '<label for="tcb_' . $k . '" class="tag_cb">' . $tag->name . '</label>';
                     $html .= '</li>';
                 }
@@ -413,8 +565,57 @@ class WPLPLanguageContent
                 foreach ($tags as $k => $tag) {
                     $html .= '<li>';
                     $html .= '<input id="tcb_' . $k . '" type="checkbox" name="wplp_source_tags[]"';
-                    $html .= 'value="' . $tag->term_id . '" class="tag_cb" />';
+                    $html .= 'value="' . $tag->term_id . '" class="tag_cb ju-checkbox" />';
                     $html .= '<label for="tcb_' . $k . '" class="tag_cb">' . $tag->name . '</label></li>';
+                    $html .= '</li>';
+                }
+            }
+        } elseif ($type === 'src_category_list') {
+            $html .= '<li><input id="cat_list_all" type="checkbox" name="wplp_source_category_list[]" class="ju-checkbox"';
+            $html .= 'value="_all" checked="checked" /><label for="cat_list_all" class="cat_list_cb">All</li>';
+            if (is_multisite()) {
+                if ('all_blog' === $blog_post) {
+                    $blogs = get_sites();
+                    foreach ($blogs as $blog) {
+                        switch_to_blog((int)$blog->blog_id);
+                        $allcats = get_categories();
+                        foreach ($allcats as $allcat) {
+                            $cats[] = $allcat;
+                        }
+                        restore_current_blog();
+                    }
+                } else {
+                    switch_to_blog((int)$blog_post);
+                    $cats = get_categories();
+                    restore_current_blog();
+                }
+                /**
+                 * Get list category via multilanguage plugin.
+                 *
+                 * @param array  List category
+                 * @param string Language to translate
+                 *
+                 * @internal
+                 *
+                 * @return array
+                 */
+                $cats = apply_filters('wplp_get_category_by_language', $cats, $language);
+
+                foreach ($cats as $k => $cat) {
+                    $html .= '<li>';
+                    $html .= '<input id="cl_' . $k . '" type="checkbox" name="wplp_source_category_list[]" value="';
+                    $html .= $k . '_' . $cat->term_id . '"  class="cat_list_cb ju-checkbox" />';
+                    $html .= '<label for="cl_' . $k . '" class="cat_list_cb">' . $cat->name . '</label>';
+                    $html .= '</li>';
+                }
+            } else {
+                $cats = self::getCategoryByLanguage('', $language);
+
+                foreach ($cats as $k => $cat) {
+                    $html .= '<li>';
+                    $html .= '<input id="cl_' . $k . '" type="checkbox" name="wplp_source_category_list[]" value="';
+                    $html .= $cat->term_id . '"  class="cat_list_cb" />';
+                    $html .= '<label for="cl_' . $k . '" class="cat_list_cb ju-checkbox">' . $cat->name . '</label>';
                     $html .= '</li>';
                 }
             }
@@ -423,12 +624,15 @@ class WPLPLanguageContent
     }
     /**
      * Check WPML configuation to find language actived
-     * @return bool
+     *
+     * @return boolean
      */
     public function checkWPMLConfig()
     {
         global $wpdb;
-        $count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}icl_languages WHERE active = 1");
+        $query = 'SELECT COUNT(*) FROM '.$wpdb->prefix.'icl_languages WHERE active = 1';
+        //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- The variables was escaped
+        $count = $wpdb->get_var($query);
         if (!empty($count)) {
             return true;
         }

@@ -425,6 +425,10 @@ html[dir="rtl"] .wplp_container.default .category{
 	box-shadow: none;
 }
 
+/*//REMOVE underline on the navigation arrows*/
+  .wplp_container .flex-direction-nav a:hover {
+	box-shadow: none !important;
+}
 .wplp_container .flex-direction-nav .flex-prev {
 	left: -50px;
 	text-indent : 0 !important;

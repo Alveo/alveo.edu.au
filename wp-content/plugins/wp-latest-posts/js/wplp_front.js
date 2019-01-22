@@ -2,29 +2,51 @@ function render_default(widget_params){
 
 (function($) {
 $(document).ready(function(){
-      
         var options = {
-               selector: ".defaultflexslide > .parent",
-               controlNav : false,
-               directionNav : true,
-               slideshow : true,
-               animation: "slide",
-               animationLoop : true,
-               pauseOnHover : false ,
-               pauseOnAction : true,
-               direction : "horizontal",
-               slideshowSpeed : 7000,
-               animationSpeed : 600,
-               touch : true
-        };
+           selector: ".defaultflexslide > .parent",
+           controlNav : false,
+           directionNav : true,
+           slideshow : true,
+           animation: "slide",
+           animationLoop : true,
+           pauseOnHover : false ,
+           pauseOnAction : true,
+           direction : "horizontal",
+           slideshowSpeed : 7000,
+           animationSpeed : 600,
+           touch : true,
+            start: function(slider) { // fires when the slider loads the first slide
+                $(slider).find('.flex-active-slide img.wplp-lazy-hidden')
+                    .each(function() {
+                        var src = $(this).attr('data-wplp-src');
+                        $(this).removeClass('wplp-lazy-hidden').addClass('wplp-lazy-loaded');
+                        $(this).attr('src', src).removeAttr('data-wplp-src');
 
+                    });
+            },
+            before: function (slider) {
+               var slides = slider.slides;
+               index = slider.animatingTo;
+               $slide = $(slides[index]);
+
+               // Fires when next slide
+               $slide.find('img.wplp-lazy-hidden').each(function () {
+                   if (!$(this).hasClass('wplp-lazy-loaded')) {
+                       var src = $(this).attr('data-wplp-src');
+                       $(this).attr('src', src).removeAttr('data-wplp-src');
+                       $(this).removeClass('wplp-lazy-hidden').addClass('wplp-lazy-loaded');
+                   }
+               });
+
+            }
+        };
                 /*
                  * 
                  * 
                  * Option 
                  * 
                  */
-                if (typeof widget_params.pagination != 'undefined') {
+        if (typeof widget_params.pagination != 'undefined') {
                 switch (widget_params.pagination) {
                     case '0':
                         options.controlNav = false;
@@ -79,10 +101,10 @@ $(document).ready(function(){
         if (typeof widget_params.animationloop != 'undefined') {
                 switch (widget_params.animationloop) {
                     case '0':
-                         options.animationLoop = true;
+                         options.animationLoop = false;
                         break;
                     case '1':
-                         options.animationLoop = false;
+                         options.animationLoop = true;
                         break;
                 }
             }
@@ -90,10 +112,10 @@ $(document).ready(function(){
         if (typeof widget_params.pausehover != 'undefined') {
                 switch (widget_params.pausehover) {
                     case '0':
-                        options.pauseOnHover = true;
+                        options.pauseOnHover = false;
                         break;
                     case '1':
-                        options.pauseOnHover = false;
+                        options.pauseOnHover = true;
                         break;
                 }
             }
@@ -101,10 +123,10 @@ $(document).ready(function(){
          if (typeof widget_params.pauseaction != 'undefined') {
                 switch (widget_params.pauseaction) {
                     case '0':
-                        options.pauseOnAction = true;
+                        options.pauseOnAction = false;
                         break;
                     case '1':
-                        options.pauseOnAction = false;
+                        options.pauseOnAction = true;
                         break;
                 }
             }
@@ -122,14 +144,15 @@ $(document).ready(function(){
         if (typeof widget_params.touch != 'undefined') {
             switch (widget_params.touch) {
                 case '0':
-                    options.touch = false;
+                    options.touch = true;
                     break;
                 case '1':
-                    options.touch = true;
+                    options.touch = false;
                     break;
             }
         }
-        widget_params.slideshowspeed = parseInt(widget_params.slideshowspeed);    
+        
+        widget_params.slideshowspeed = parseInt(widget_params.slideshowspeed);
         if (typeof widget_params.slideshowspeed != 'undefined' && !isNaN(widget_params.slideshowspeed)) {
                 options.slideshowSpeed = widget_params.slideshowspeed;
             }

@@ -457,7 +457,7 @@ html[xmlns] .slides {
 }
 
 #wplpnavtabs .tabs li.tab{
-    background-color: #2196F3 !important;
+    background-color: #ffab40 !important;
 }
 
 #wplpnavtabs .tabs a {
@@ -605,7 +605,19 @@ html[xmlns] .slides {
     background-color: #03a9f4 !important;
 }
 
+.light-orange {
+    background-color: #ff8726 !important;
+}
+
 .white-text {
     color: #fff !important;
 }
 
+.ju-main-wrapper .ju-right-panel {
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+.ju-main-wrapper .ju-right-panel .tabs.ju-top-tabs li.tab a.link-tab {
+    padding: 0 !important;
+}
