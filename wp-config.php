@@ -30,11 +30,11 @@ define('WP_AUTO_UPDATE_CORE', false);
 
 if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') {
   $_SERVER['HTTPS'] = 'on';
-  define('WP_HOME', 'https://alveo.edu.au');
-  define('WP_SITEURL', 'https://alveo.edu.au');
+  define('WP_HOME', 'https://www.alveo.edu.au');
+  define('WP_SITEURL', 'https://www.alveo.edu.au');
 } else {
-  define('WP_HOME', 'http://alveo.edu.au');
-  define('WP_SITEURL', 'http://alveo.edu.au');
+  define('WP_HOME', 'http://www.alveo.edu.au');
+  define('WP_SITEURL', 'http://www.alveo.edu.au');
 }
 
 function fromenv($key, $default = null) {
