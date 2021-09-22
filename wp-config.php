@@ -18,7 +18,7 @@
  * @package WordPress
  */
 
-define('JETPACK_IP_ADDRESS_OK', '220.233.129.230'); // Whitelist
+define('JETPACK_IP_ADDRESS_OK', fromenv('JETPACK_IP_ADDRESS_OK','1.40.91.80')); // Whitelist
 
  // No in-place theme edits, because this is a Dokku image
 define('DISALLOW_FILE_MODS', true); 
@@ -30,11 +30,11 @@ define('WP_AUTO_UPDATE_CORE', false);
 
 if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') {
   $_SERVER['HTTPS'] = 'on';
-  define('WP_HOME', 'https://www.alveo.edu.au');
-  define('WP_SITEURL', 'https://www.alveo.edu.au');
+  define('WP_HOME', fromenv('WP_HOME', 'https://www.alveo.edu.au'));
+  define('WP_SITEURL', fromenv('WP_SITEURL', 'https://www.alveo.edu.au'));
 } else {
-  define('WP_HOME', 'http://www.alveo.edu.au');
-  define('WP_SITEURL', 'http://www.alveo.edu.au');
+  define('WP_HOME', fromenv('WP_HOME', 'http://www.alveo.edu.au'));
+  define('WP_SITEURL', fromenv('WP_SITEURL', 'http://www.alveo.edu.au'));
 }
 
 function fromenv($key, $default = null) {
